@@ -160,8 +160,7 @@
                 xhr.send(JSON.stringify({
                     prompt: msg,
                     n:variants,
-                    size: resolution,
-                    response_format: "b64_json"
+                    size: resolution
                 }));
                 xhr.onerror = function() {
                     document.querySelector('#conversation-body').innerHTML += `
@@ -182,7 +181,6 @@
                 
                 xhr.onload = function() {
                     let data = JSON.parse(this.responseText)
-                    console.log(data)
                     if (xhr.status != 200) {
                         document.querySelector('#conversation-body').innerHTML += `
                             <div class="dialogue-message-error">
@@ -193,8 +191,7 @@
                     } else {
                         document.querySelector('#conversation-body').innerHTML += `
                             <div class="dialogue-message-dalle">
-                                <p><img src="data:image/png;base64, ${data.data[0].b64_json}" width="100%" alt="Generated via DALL-E"></p>
-                                <p><strong><a href="data:image/png;base64, ${data.data[0].b64_json}" download>DOWNLOAD</a></strong></p>
+                                <p><img src="${data.data[0].url}" width="100%"></p>
                             </div>
                             <div style="clear: both;"></div>
                         `
