@@ -191,7 +191,7 @@
                     } else {
                         document.querySelector('#conversation-body').innerHTML += `
                             <div class="dialogue-message-dalle">
-                                <p><img src="${data.data[0].url}" width="100%" download></p>
+                                <p><a href="${data.data[0].url}" download><img src="${data.data[0].url}" width="100%"></a></p>
                             </div>
                             <div style="clear: both;"></div>
                         `
