@@ -36,8 +36,11 @@
             margin: 0px auto;
         }
         button {
-            font-size: 32px;
+            font-size: 18px;
+            font-weight: bold;
             padding: 10px 20px;
+            border: 0;
+            border-radius: 15px;
         }
 
         img {
@@ -65,6 +68,7 @@
             float: left;
             font-family: courier;
             font-weight: bold;
+            border-radius: 15px;
         }
 
         .dialogue-message-dalle {
@@ -136,6 +140,7 @@
             let variants = 1
 
             const token = localStorage.getItem('apiToken')
+            console.log(token)
             if (token != undefined && token != "") {
                 document.querySelector('#token').value = token
                 document.querySelector('.settings-form').style.display = 'none'
@@ -159,21 +164,27 @@
                 xhr.setRequestHeader('Authorization',  `Bearer ${apiToken}`);
                 xhr.send(JSON.stringify({
                     prompt: msg,
-                    n:variants,
+                    n: variants,
                     size: resolution
                 }));
-                xhr.onerror = function() {
+                xhr.onerror = function(e) {
+               
                     document.querySelector('#conversation-body').innerHTML += `
                             <div class="dialogue-message-error">
-                                <p>Something went wrong. Try your prompt again.</p>
+                                <p>Something went wrong.</p>
+                                <p><strong>Error:</strong></p>
+                                <p>${JSON.parse(this.response).error.message}</p>
                             </div>
                             <div style="clear: both;"></div>
                         `
                 }
-                xhr.onabort = function() {
+                xhr.onabort = function(e) {
+                    console.log(this.response)
                     document.querySelector('#conversation-body').innerHTML += `
                             <div class="dialogue-message-error">
-                                <p>Something went wrong. Try your prompt again.</p>
+                                <p>Something went wrong.</p>
+                                <p><strong>Error:</strong></p>
+                                <p>${JSON.parse(this.response).error.message}</p>
                             </div>
                             <div style="clear: both;"></div>
                         `
@@ -182,9 +193,12 @@
                 xhr.onload = function() {
                     let data = JSON.parse(this.responseText)
                     if (xhr.status != 200) {
+                        console.log(JSON.parse(this.response).error.message)
                         document.querySelector('#conversation-body').innerHTML += `
                             <div class="dialogue-message-error">
-                                <p>Something went wrong. Try your prompt again.</p>
+                                <p>Something went wrong.</p>
+                                <p><strong>Error:</strong></p>
+                                <p>${JSON.parse(this.response).error.message}</p>
                             </div>
                             <div style="clear: both;"></div>
                         `
