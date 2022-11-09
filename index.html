@@ -45,10 +45,6 @@
             border-radius: 15px;
         }
 
-        img {
-            border-radius: 15px;
-        }
-
         .dialogue-message-yours {
             margin-top: 15px;
             width: 200px;
@@ -93,6 +89,44 @@
         .resolution-button.active-button {
             background-color: lightgreen;
         }
+
+        .generation {
+            border: 1px solid #DDD;
+            border-radius: 15px;
+            max-width: 1024px;
+            margin: 10px;
+            float: left;
+        }
+
+        .generation-header {
+            
+        }
+
+        .generation-footer {
+            padding: 5px;
+            border-top: 1px solid #DDD;
+            background-color: #EEE;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        .generation-prompt {
+            font-family: courier;
+            padding: 5px;
+            border-radius: 15px;
+            font-weight: bold;
+        }
+
+        .generation-body {
+            
+        }
+
+        .generation-body img {
+            margin: 0px auto;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+            width: 100%;
+        }
         </style>        
     </head>
     <body>
@@ -108,12 +142,16 @@
         </div>
         <div id="conversation">
             <div id="conversation-body">
+                
             </div>
             
         <div id="conversation-footer">
             <form id="prompt-form">
                 <p><input type="text" id="text-input" placeholder="Enter prompt"/></p>
-                <p><button id="send-button">Send</button></p>
+                <p>
+                    <button id="send-button">Generate</button>
+                    <button id="repeat-button">Repeat last</button>
+                </p>
             </form>
             <p><strong>Resolution:</strong></p>
             <button class="resolution-button active-button" id="resolution-256">256 x 256</button>
@@ -140,6 +178,11 @@
             setActiveClass()
             
             let variants = 1
+            let lastPrompt = localStorage.getItem('lastPrompt')
+            let lastElement = undefined
+            if (lastPrompt == undefined || lastPrompt == "") {
+                lastPrompt = ''
+            }
 
             const token = localStorage.getItem('apiToken')
             console.log(token)
@@ -149,18 +192,41 @@
             }
     
             function sendMessage(msg) {
+                lastPrompt = msg
+                localStorage.setItem('lastPrompt', lastPrompt)
                 window.scrollTo(0, document.body.scrollHeight);
                 const apiToken = document.querySelector('#token').value
                 if (apiToken) {
                     localStorage.setItem('apiToken', apiToken)
                 }
-                document.querySelector('#conversation-body').innerHTML += `
-                    <div class="dialogue-message-yours">
-                        <p>${msg}</p>
-                    </div>
-                    <div style="clear: both;"></div>
-                `
+                let genHolder = document.createElement('div')
+                genHolder.className = 'generation'
+                genHolder.style.maxWidth = resolution.split('x')[0];
+           
+                document.querySelector('#conversation-body').append(genHolder)
+
+                let genBody = document.createElement('div')
+                genBody.className = 'generation-body'
+                
+
+                let genImage = document.createElement('img')
+                genImage.src = './images/generating.png'
+                
+                let genFooter = document.createElement('div')
+                genFooter.className = 'generation-footer'
+
+                let footerText = document.createElement('p')
+                footerText.className = 'generation-prompt'
+                footerText.innerText = lastPrompt
+
+                genBody.append(genImage)
+                genFooter.append(footerText)
+                genHolder.append(genBody)
+                genHolder.append(genFooter)
+                lastElement = genHolder
+
                 var xhr = new XMLHttpRequest();
+                xhr.element = genHolder
                 xhr.open("POST", "https://api.openai.com/v1/images/generations", true);
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.setRequestHeader('Authorization',  `Bearer ${apiToken}`);
@@ -205,12 +271,7 @@
                             <div style="clear: both;"></div>
                         `
                     } else {
-                        document.querySelector('#conversation-body').innerHTML += `
-                            <div class="dialogue-message-dalle">
-                                <p><img src="${data.data[0].url}" width="100%"></p>
-                            </div>
-                            <div style="clear: both;"></div>
-                        `
+                        this.element.getElementsByTagName('img')[0].src = data.data[0].url
                     }         
                 }
                 document.querySelector('#text-input').value = ""
@@ -225,6 +286,11 @@
             document.querySelector('#send-button').addEventListener("click", (e) => {
                 e.preventDefault()
                 sendMessage(document.querySelector('#text-input').value)
+            })
+
+            document.querySelector('#repeat-button').addEventListener("click", (e) => {
+                e.preventDefault()
+                sendMessage(lastPrompt)
             })
 
             document.querySelector('#resolution-256').addEventListener("click", (e) => {
