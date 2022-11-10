@@ -251,6 +251,7 @@
                             </div>
                             <div style="clear: both;"></div>
                         `
+                        this.element.remove()
                        
                 }
                 xhr.onabort = function(e) {
@@ -262,12 +263,14 @@
                             </div>
                             <div style="clear: both;"></div>
                         `
+                        this.element.remove()
                        
                 }
                 
                 xhr.onload = function() {
                     let data = JSON.parse(this.responseText)
                     if (xhr.status != 200) {
+                        this.element.remove()
                         document.querySelector('#conversation-body').innerHTML += `
                             <div class="dialogue-message-error">
                                 <p>Something went wrong.</p>
