@@ -154,12 +154,41 @@
                 </p>
             </form>
             <p><strong>Resolution:</strong></p>
-            <button class="resolution-button active-button" id="resolution-256">256 x 256</button>
-            <button class="resolution-button" id="resolution-512">512 x 512</button>
-            <button class="resolution-button" id="resolution-1024">1024 x 1024</button>
+            <p>
+                <button class="resolution-button active-button" id="resolution-256">256 x 256</button>
+                <button class="resolution-button" id="resolution-512">512 x 512</button>
+                <button class="resolution-button" id="resolution-1024">1024 x 1024</button>
+            </p>
+
+            <p><strong>Amount:</strong> <span id="current-amount">1</span></p>
+            <p>
+                <input type="range" min="1" max="10" value="1" class="amount-slider" id="amount-slider">
+            </p>
+            
         </div>
     </div>
         <script type="text/javascript">
+
+            function addGeneration(resolution, image) {
+                let genHolder = document.createElement('div')
+                genHolder.className = 'generation'
+                genHolder.style.maxWidth = resolution;
+                document.querySelector('#conversation-body').append(genHolder)
+                let genBody = document.createElement('div')
+                genBody.className = 'generation-body'
+                let genImage = document.createElement('img')
+                genImage.src = image
+                let genFooter = document.createElement('div')
+                genFooter.className = 'generation-footer'
+                let footerText = document.createElement('p')
+                footerText.className = 'generation-prompt'
+                footerText.innerText = lastPrompt
+                genBody.append(genImage)
+                genFooter.append(footerText)
+                genHolder.append(genBody)
+                genHolder.append(genFooter)
+                return genHolder
+            }
 
             function clearActiveClass() {
                 document.querySelector('#resolution-256').classList.remove('active-button')
@@ -198,40 +227,18 @@
                 if (apiToken) {
                     localStorage.setItem('apiToken', apiToken)
                 }
-                let genHolder = document.createElement('div')
-                genHolder.className = 'generation'
-                genHolder.style.maxWidth = resolution.split('x')[0];
-           
-                document.querySelector('#conversation-body').append(genHolder)
 
-                let genBody = document.createElement('div')
-                genBody.className = 'generation-body'
-                
-
-                let genImage = document.createElement('img')
-                genImage.src = './generating.png'
-                
-                let genFooter = document.createElement('div')
-                genFooter.className = 'generation-footer'
-
-                let footerText = document.createElement('p')
-                footerText.className = 'generation-prompt'
-                footerText.innerText = lastPrompt
-
-                genBody.append(genImage)
-                genFooter.append(footerText)
-                genHolder.append(genBody)
-                genHolder.append(genFooter)
-                lastElement = genHolder
+                let newElement = addGeneration(resolution.split('x')[0], './generating.png')
+                lastElement = newElement
 
                 var xhr = new XMLHttpRequest();
-                xhr.element = genHolder
+                xhr.element = newElement
                 xhr.open("POST", "https://api.openai.com/v1/images/generations", true);
                 xhr.setRequestHeader('Content-Type', 'application/json');
                 xhr.setRequestHeader('Authorization',  `Bearer ${apiToken}`);
                 xhr.send(JSON.stringify({
                     prompt: msg,
-                    n: variants,
+                    n: parseInt(document.querySelector('#amount-slider').value),
                     size: resolution
                 }));
                 xhr.onerror = function(e) {
@@ -271,9 +278,13 @@
                         `
                         if (xhr.status == 401) {
                             document.querySelector('.settings-form').style.display = 'block'
-                            console.log('hi')
                         }
                     } else {
+                        console.log(data.data)
+                        for (let image of data.data.slice(1)) {
+                            let newElement = addGeneration(resolution.split('x')[0], image.url)
+                            lastElement = newElement
+                        }
                         document.querySelector('.settings-form').style.display = 'none'
                         this.element.getElementsByTagName('img')[0].src = data.data[0].url
                     }         
@@ -295,6 +306,11 @@
             document.querySelector('#repeat-button').addEventListener("click", (e) => {
                 e.preventDefault()
                 sendMessage(lastPrompt)
+            })
+
+            document.querySelector('#amount-slider').addEventListener("input", (e) => {
+                document.querySelector('#current-amount').innerText = document.querySelector('#amount-slider').value
+                e.preventDefault()
             })
 
             document.querySelector('#resolution-256').addEventListener("click", (e) => {
