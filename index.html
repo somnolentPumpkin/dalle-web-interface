@@ -5,6 +5,7 @@
         <style type="text/css">
         body {
             font-family: arial;
+            background-color: #BBB;
         }
         #conversation {
             padding: 25px;
@@ -94,7 +95,7 @@
             border: 1px solid #DDD;
             border-radius: 15px;
             max-width: 1024px;
-            margin: 10px;
+            margin: 25px;
             float: left;
         }
 
@@ -185,7 +186,6 @@
             }
 
             const token = localStorage.getItem('apiToken')
-            console.log(token)
             if (token != undefined && token != "") {
                 document.querySelector('#token').value = token
                 document.querySelector('.settings-form').style.display = 'none'
@@ -247,7 +247,6 @@
                         `
                 }
                 xhr.onabort = function(e) {
-                    console.log(this.response)
                     document.querySelector('#conversation-body').innerHTML += `
                             <div class="dialogue-message-error">
                                 <p>Something went wrong.</p>
@@ -261,7 +260,6 @@
                 xhr.onload = function() {
                     let data = JSON.parse(this.responseText)
                     if (xhr.status != 200) {
-                        console.log(JSON.parse(this.response).error.message)
                         document.querySelector('#conversation-body').innerHTML += `
                             <div class="dialogue-message-error">
                                 <p>Something went wrong.</p>
