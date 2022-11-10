@@ -5,7 +5,6 @@
         <style type="text/css">
         body {
             font-family: arial;
-            background-color: #BBB;
         }
         #conversation {
             padding: 25px;
@@ -245,6 +244,7 @@
                             </div>
                             <div style="clear: both;"></div>
                         `
+                       
                 }
                 xhr.onabort = function(e) {
                     document.querySelector('#conversation-body').innerHTML += `
@@ -255,6 +255,7 @@
                             </div>
                             <div style="clear: both;"></div>
                         `
+                       
                 }
                 
                 xhr.onload = function() {
@@ -268,7 +269,12 @@
                             </div>
                             <div style="clear: both;"></div>
                         `
+                        if (xhr.status == 401) {
+                            document.querySelector('.settings-form').style.display = 'block'
+                            console.log('hi')
+                        }
                     } else {
+                        document.querySelector('.settings-form').style.display = 'none'
                         this.element.getElementsByTagName('img')[0].src = data.data[0].url
                     }         
                 }
