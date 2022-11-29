@@ -336,6 +336,13 @@
                 setActiveClass()
                 e.preventDefault()
             })
+
+            document.querySelector('#token').addEventListener("change", (e) => {
+                const apiToken = document.querySelector('#token')
+                if (apiToken) {
+                    localStorage.setItem('apiToken', apiToken.value)
+                }
+            })
         </script>
     </body>
 </html>
